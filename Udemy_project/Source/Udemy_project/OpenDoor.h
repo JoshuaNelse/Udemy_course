@@ -14,17 +14,18 @@ class UDEMY_PROJECT_API UOpenDoor : public UActorComponent
 
 private:
 	AActor *Owner;
+	UPROPERTY(EditAnywhere)
+	AActor *ActorThatOpens; //pawn inherets from Actor
+
 	const FRotator OpenDoorRotatorValue = FRotator(0.f, 65.f, 0.f);
 	const FRotator CloseDoorRotatorValue = FRotator(0.f, 0.f, 0.f);
-
-	UPROPERTY(VisibleAnywhere)
-	float OpenAngle = 90.f;
 
 	UPROPERTY(EditAnywhere)
 	ATriggerVolume *PressurePlate;
 
 	UPROPERTY(EditAnywhere)
-	AActor *ActorThatOpens; //pawn inherets from Actor
+	float StayOpenTime = 1.f;
+	float DoorOpenTimestamp = 0.f; //init at '0' to default door closed
 
 public:	
 	// Sets default values for this component's properties
@@ -34,8 +35,12 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
-	void OpenDoor(); 
+	void OpenDoor();
+	void SetLastDoorOpenTimestamp();
+
 	void CloseDoor();
+
+	bool IsDoorTimerExhausted();
 
 public:	
 	// Called every frame

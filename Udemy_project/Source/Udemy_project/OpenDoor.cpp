@@ -37,11 +37,25 @@ void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 
 void UOpenDoor::CloseDoor()
 {
-	this->Owner->SetActorRotation(this->CloseDoorRotatorValue);
+	if (IsDoorTimerExhausted())
+	{
+		this->Owner->SetActorRotation(this->CloseDoorRotatorValue);
+	}
+}
+
+bool UOpenDoor::IsDoorTimerExhausted()
+{
+	return (GetWorld()->GetTimeSeconds() - this->DoorOpenTimestamp) > this->StayOpenTime;
 }
 
 void UOpenDoor::OpenDoor()
 {
 	this->Owner->SetActorRotation(this->OpenDoorRotatorValue);
+	SetLastDoorOpenTimestamp();
+}
+
+void UOpenDoor::SetLastDoorOpenTimestamp()
+{
+	this->DoorOpenTimestamp = GetWorld()->GetTimeSeconds();
 }
 

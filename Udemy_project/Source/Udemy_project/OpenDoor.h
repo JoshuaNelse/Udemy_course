@@ -13,12 +13,9 @@ class UDEMY_PROJECT_API UOpenDoor : public UActorComponent
 	GENERATED_BODY()
 
 private:
-	AActor *Owner;
 	UPROPERTY(EditAnywhere)
 	AActor *ActorThatOpens; //pawn inherets from Actor
-
-	const FRotator OpenDoorRotatorValue = FRotator(0.f, 65.f, 0.f);
-	const FRotator CloseDoorRotatorValue = FRotator(0.f, 0.f, 0.f);
+	AActor *Owner;
 
 	UPROPERTY(EditAnywhere)
 	ATriggerVolume *PressurePlate;

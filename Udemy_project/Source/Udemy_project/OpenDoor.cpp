@@ -39,7 +39,7 @@ void UOpenDoor::CloseDoor()
 {
 	if (IsDoorTimerExhausted())
 	{
-		this->Owner->SetActorRotation(this->CloseDoorRotatorValue);
+		this->Owner->SetActorRotation(FRotator(0.f, 0.f, 0.f));
 	}
 }
 
@@ -50,7 +50,7 @@ bool UOpenDoor::IsDoorTimerExhausted()
 
 void UOpenDoor::OpenDoor()
 {
-	this->Owner->SetActorRotation(this->OpenDoorRotatorValue);
+	this->Owner->SetActorRotation(FRotator(0.f, 75.f, 0.f));
 	SetLastDoorOpenTimestamp();
 }
 

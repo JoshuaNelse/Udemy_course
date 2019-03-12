@@ -33,7 +33,6 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	if (PhysicsHandle->GrabbedComponent)
 	{
-		GetOwner()->GetActorEyesViewPoint(OUT this->ObjectLocation, OUT this->ObjectRotation);
 		PhysicsHandle->SetTargetLocation(GetLineTraceEnd());
 	}
 }
@@ -42,11 +41,7 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 void UGrabber::InitializePhysicsHandle()
 {
 	this->PhysicsHandle = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
-	if (PhysicsHandle)
-	{
-
-	}
-	else
+	if (PhysicsHandle == nullptr)
 	{
 		UE_LOG(LogTemp, Error, TEXT("Physics handle for %s is null or undefined"), *(GetOwner()->GetName()));
 	}
@@ -71,13 +66,11 @@ void UGrabber::InitializeInputComponent()
 
 void UGrabber::Grab()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Grab pressed"));
-	GetOwner()->GetActorEyesViewPoint(OUT this->ObjectLocation, OUT this->ObjectRotation);
-	GetFirstPhysicsBodyinReach();
-	FHitResult ObjectInReach = this->GetFirstPhysicsBodyinReach();
-	UPrimitiveComponent* ComponentToGrab = ObjectInReach.GetComponent();
-	AActor* ActorHit = ObjectInReach.GetActor();
-	if (ActorHit)
+	FHitResult CollisionWithinReach = this->GetFirstPhysicsBodyinReach();
+	UPrimitiveComponent* ComponentToGrab = CollisionWithinReach.GetComponent();
+	//AActor* ActorHit = ObjectInReach.GetActor();
+
+	if (CollisionWithinReach.GetActor() != nullptr) // verify something can be grabbed
 	{
 		this->PhysicsHandle->GrabComponentAtLocation(
 			ComponentToGrab,
@@ -90,29 +83,30 @@ void UGrabber::Grab()
 
 void UGrabber::Release()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Released"));
 	this->PhysicsHandle->ReleaseComponent();
 }
 
 
 FVector UGrabber::GetLineTraceEnd()
 {
+	//This refreshes the OUT variables to make the TraceEnd Value accurate to last frame.
+	GetOwner()->GetActorEyesViewPoint(OUT this->ObjectLocation, OUT this->ObjectRotation);
 	return (this->ObjectLocation + (this->ObjectRotation.Vector() * this->Reach));
 }
 
 
 FHitResult UGrabber::GetFirstPhysicsBodyinReach()
 {
-	// line trace / ray-cast to 'reach' distance
 	FCollisionQueryParams TraceParms(FName(TEXT("")), false, GetOwner());
 	FHitResult OutHit;
-	GetWorld()->LineTraceSingleByObjectType(OUT OutHit, this->ObjectLocation, GetLineTraceEnd(),
-		FCollisionObjectQueryParams(ECollisionChannel::ECC_PhysicsBody),TraceParms);
-	
-	AActor* ActorHit = OutHit.GetActor();
-	if (ActorHit)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("ray-cast hit: %s"), *(ActorHit->GetName()));
-	}
+
+	GetWorld()->LineTraceSingleByObjectType(
+		OUT OutHit, 
+		this->ObjectLocation, 
+		GetLineTraceEnd(),
+		FCollisionObjectQueryParams(ECollisionChannel::ECC_PhysicsBody),
+		TraceParms
+	);
+
 	return OutHit;
 }

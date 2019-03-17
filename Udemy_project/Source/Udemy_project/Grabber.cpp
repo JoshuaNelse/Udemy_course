@@ -53,7 +53,6 @@ void UGrabber::InitializeInputComponent()
 	this->InputComponent = GetOwner()->FindComponentByClass<UInputComponent>();
 	if (this->InputComponent)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Input Component initialized for %s"), *(GetOwner()->GetName()));
 		this->InputComponent->BindAction("Grab", IE_Pressed, this, &UGrabber::Grab);
 		this->InputComponent->BindAction("Grab", IE_Released, this, &UGrabber::Release);
 	}
@@ -68,7 +67,6 @@ void UGrabber::Grab()
 {
 	FHitResult CollisionWithinReach = this->GetFirstPhysicsBodyinReach();
 	UPrimitiveComponent* ComponentToGrab = CollisionWithinReach.GetComponent();
-	//AActor* ActorHit = ObjectInReach.GetActor();
 
 	if (CollisionWithinReach.GetActor() != nullptr) // verify something can be grabbed
 	{
@@ -102,7 +100,7 @@ FHitResult UGrabber::GetFirstPhysicsBodyinReach()
 
 	GetWorld()->LineTraceSingleByObjectType(
 		OUT OutHit, 
-		this->ObjectLocation, 
+		this->ObjectLocation, //AKA LineTraceStart
 		GetLineTraceEnd(),
 		FCollisionObjectQueryParams(ECollisionChannel::ECC_PhysicsBody),
 		TraceParms

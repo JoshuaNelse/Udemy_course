@@ -13,8 +13,6 @@ class UDEMY_PROJECT_API UOpenDoor : public UActorComponent
 	GENERATED_BODY()
 
 private:
-	UPROPERTY(EditAnywhere)
-	AActor *ActorThatOpens; //pawn inherets from Actor
 	AActor *Owner;
 
 	UPROPERTY(EditAnywhere)
@@ -38,6 +36,7 @@ protected:
 	void CloseDoor();
 
 	bool IsDoorTimerExhausted();
+	float GetTotalMassOfActorsOnPlate();
 
 public:	
 	// Called every frame

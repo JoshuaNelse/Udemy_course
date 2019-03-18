@@ -20,6 +20,7 @@ public:
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
+	void InitializePlaterToTeleport();
 	void InitializeRemoteTeleporter();
 	void InitializeLocalLocation();
 	void InitializeRemoteLocation();
@@ -27,16 +28,20 @@ protected:
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-	UPROPERTY(EditAnywhere)
-	ATriggerVolume* RemoteVolume = nullptr;
-	AActor* PlayerToTeleport = nullptr;
+
+	void TeleportPlayerWhenCollidingWithVolume();
+	
 	UPROPERTY(EditAnywhere)
 	ATriggerVolume* LocalVolume = nullptr;
 	UPROPERTY(EditAnywhere)
-	AActor* RemoteTeleporter;
+	AActor* RemoteTeleporter = nullptr;
+	AActor* PlayerToTeleport = nullptr;
+
+
+	void SetbCoolingDown(bool);
 
 private:
 	FVector RemoteLocation;
 	FVector LocalLocation;
-	bool IsCoolingDown = false;
+	bool bCoolingDown = false; 
 };

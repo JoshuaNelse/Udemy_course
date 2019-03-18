@@ -20,45 +20,67 @@ UTeleporter::UTeleporter()
 void UTeleporter::BeginPlay()
 {
 	Super::BeginPlay();
-	this->PlayerToTeleport = GetWorld()->GetFirstPlayerController()->GetPawn();
+	InitializePlaterToTeleport();
 	InitializeRemoteLocation();
 	InitializeRemoteTeleporter();
 	InitializeLocalLocation();
 }
 
 
+
 // Called every frame
 void UTeleporter::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	if (!LocalVolume || !PlayerToTeleport || !RemoteTeleporter) return; // guarding null pointers
+	TeleportPlayerWhenCollidingWithVolume();
+}
+
+
+void UTeleporter::TeleportPlayerWhenCollidingWithVolume()
+{
+	if (!LocalVolume || !PlayerToTeleport || !RemoteTeleporter) {
+		return; //guarding null pointers
+	}
 
 	if (LocalVolume->IsOverlappingActor(PlayerToTeleport))
 	{
-		if (!IsCoolingDown)
+		if (!bCoolingDown)
 		{
 			PlayerToTeleport->SetActorLocation(RemoteLocation);
-			RemoteTeleporter->FindComponentByClass<UTeleporter>()->IsCoolingDown = true;
+			RemoteTeleporter->FindComponentByClass<UTeleporter>()->SetbCoolingDown(true);
 		}
-	} 
+	}
 	else
 	{
-		this->IsCoolingDown = false;
+		this->bCoolingDown = false;
 	}
+}
 
+
+void UTeleporter::SetbCoolingDown(bool Boolean)
+{
+	this->bCoolingDown = Boolean;
 }
 
 
 void UTeleporter::InitializeRemoteLocation()
 {
-	if (this->RemoteVolume) {
-		this->RemoteLocation = this->RemoteVolume->GetActorLocation();
-	}
-	else {
-		UE_LOG(LogTemp
-			, Error
-			, TEXT("Teleporter %s has no Remote Volume defined. please add a Remote Volume")
-			, *GetOwner()->GetName());
+	if (RemoteTeleporter)
+	{
+		auto RemoteVolume = RemoteTeleporter->FindComponentByClass<UTeleporter>();
+		if (RemoteVolume->LocalVolume) 
+		{
+			this->RemoteLocation = RemoteVolume->LocalVolume->GetActorLocation();
+		}
+		else
+		{
+			UE_LOG(LogTemp
+				, Error
+				, TEXT("Local teleporter %s cannot find remote volume for %s. Please assign a local volume for %s")
+				, *GetOwner()->GetName()
+				, *this->RemoteTeleporter->GetName()
+				, *this->RemoteTeleporter->GetName());
+		}
 	}
 }
 
@@ -85,6 +107,14 @@ void UTeleporter::InitializeRemoteTeleporter()
 			, Error
 			, TEXT("Teleporter %s has no Remote Teleporter defined. please add a Remote Teleporter")
 			, *GetOwner()->GetName());
+	}
+}
+
+void UTeleporter::InitializePlaterToTeleport()
+{
+	this->PlayerToTeleport = GetWorld()->GetFirstPlayerController()->GetPawn();
+	if (!PlayerToTeleport) {
+		UE_LOG(LogTemp, Error, TEXT("Failed to init PlayerToTeleport for %s"), *GetOwner()->GetName());
 	}
 }
 

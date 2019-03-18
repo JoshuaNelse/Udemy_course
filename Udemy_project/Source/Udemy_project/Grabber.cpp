@@ -31,9 +31,12 @@ void UGrabber::BeginPlay()
 void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	if (PhysicsHandle->GrabbedComponent)
+	if (PhysicsHandle)
 	{
-		PhysicsHandle->SetTargetLocation(GetLineTraceEnd());
+		if (PhysicsHandle->GrabbedComponent)
+		{
+			PhysicsHandle->SetTargetLocation(GetLineTraceEnd());
+		}
 	}
 }
 
@@ -81,7 +84,10 @@ void UGrabber::Grab()
 
 void UGrabber::Release()
 {
-	this->PhysicsHandle->ReleaseComponent();
+	if (PhysicsHandle)
+	{
+		this->PhysicsHandle->ReleaseComponent();
+	}
 }
 
 

@@ -5,43 +5,38 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Engine/TriggerVolume.h"
-#include "OpenDoor.generated.h"
+#include "Teleporter.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FDoorEvent);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class UDEMY_PROJECT_API UOpenDoor : public UActorComponent
+class UDEMY_PROJECT_API UTeleporter : public UActorComponent
 {
 	GENERATED_BODY()
 
-private:
-	AActor *Owner = nullptr;
-
-	UPROPERTY(EditAnywhere)
-	ATriggerVolume *PressurePlate = nullptr;
-
-	UPROPERTY(EditAnywhere)
-	float TriggerMass = 30.f;
-
 public:	
-	UPROPERTY(BlueprintAssignable)
-	FDoorEvent OnOpen;
-	UPROPERTY(BlueprintAssignable)
-	FDoorEvent OnClose;
-
 	// Sets default values for this component's properties
-	UOpenDoor();
+	UTeleporter();
 
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
-
-	void InitPressurePlate();
-	float GetTotalMassOfActorsOnPlate();
+	void InitializeRemoteTeleporter();
+	void InitializeLocalLocation();
+	void InitializeRemoteLocation();
 
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	UPROPERTY(EditAnywhere)
+	ATriggerVolume* RemoteVolume = nullptr;
+	AActor* PlayerToTeleport = nullptr;
+	UPROPERTY(EditAnywhere)
+	ATriggerVolume* LocalVolume = nullptr;
+	UPROPERTY(EditAnywhere)
+	AActor* RemoteTeleporter;
 
-		
+private:
+	FVector RemoteLocation;
+	FVector LocalLocation;
+	bool IsCoolingDown = false;
 };

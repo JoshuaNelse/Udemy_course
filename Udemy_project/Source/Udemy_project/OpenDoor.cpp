@@ -22,6 +22,7 @@ void UOpenDoor::BeginPlay()
 {
 	Super::BeginPlay();
 	this->Owner = GetOwner();
+	InitPressurePlate();
 }
 
 
@@ -29,47 +30,36 @@ void UOpenDoor::BeginPlay()
 void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	//if the actor that opens is in the volume then open the door
-		(GetTotalMassOfActorsOnPlate() > 20.f) ? OpenDoor() : CloseDoor();
+	(GetTotalMassOfActorsOnPlate() > this->TriggerMass) ? this->OnOpen.Broadcast() : this->OnClose.Broadcast();
 }
 
-void UOpenDoor::CloseDoor()
-{
-	if (IsDoorTimerExhausted())
-	{
-		this->Owner->SetActorRotation(FRotator(0.f, 0.f, 0.f));
-	}
-}
 
-bool UOpenDoor::IsDoorTimerExhausted()
-{
-	return (GetWorld()->GetTimeSeconds() - this->DoorOpenTimestamp) > this->StayOpenTime;
-}
-
-void UOpenDoor::OpenDoor()
-{
-	this->Owner->SetActorRotation(FRotator(0.f, 75.f, 0.f));
-	SetLastDoorOpenTimestamp();
-}
-
-void UOpenDoor::SetLastDoorOpenTimestamp()
-{
-	this->DoorOpenTimestamp = GetWorld()->GetTimeSeconds();
-}
 
 float UOpenDoor::GetTotalMassOfActorsOnPlate()
 {
 	float TotalMass = 0.f;
-	TArray<AActor*> ListOfOverLappingActors;
-	this->PressurePlate->GetOverlappingActors(OUT ListOfOverLappingActors);
-	for (AActor* Actor : ListOfOverLappingActors)
+	if (this->PressurePlate)
 	{
-		TotalMass += Actor->FindComponentByClass<UPrimitiveComponent>()->GetMass();
-		UE_LOG(LogTemp, Warning, TEXT("Mass on Plate: %s - %f")
-			, *Actor->GetName()
-			, TotalMass);
+		TArray<AActor*> ListOfOverLappingActors;
+		this->PressurePlate->GetOverlappingActors(OUT ListOfOverLappingActors);
+		for (const AActor* Actor : ListOfOverLappingActors)
+		{
+			TotalMass += Actor->FindComponentByClass<UPrimitiveComponent>()->GetMass();
+		}
 	}
 	return TotalMass;
+}
+
+
+void UOpenDoor::InitPressurePlate()
+{
+	//Pressure plate is define in editor *set to EditAnywhere in header for front end definition
+	if (!PressurePlate)
+	{
+		UE_LOG(LogTemp
+			, Error
+			, TEXT("PressurePlate is null for %s. Please Define a PressurePlate for OpenDoor component")
+			, *GetOwner()->GetName());
+	}
 }
 

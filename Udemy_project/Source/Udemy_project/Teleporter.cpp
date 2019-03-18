@@ -20,7 +20,7 @@ UTeleporter::UTeleporter()
 void UTeleporter::BeginPlay()
 {
 	Super::BeginPlay();
-	InitializePlaterToTeleport();
+	InitializePlayerToTeleport();
 	InitializeRemoteLocation();
 	InitializeRemoteTeleporter();
 	InitializeLocalLocation();
@@ -110,7 +110,7 @@ void UTeleporter::InitializeRemoteTeleporter()
 	}
 }
 
-void UTeleporter::InitializePlaterToTeleport()
+void UTeleporter::InitializePlayerToTeleport()
 {
 	this->PlayerToTeleport = GetWorld()->GetFirstPlayerController()->GetPawn();
 	if (!PlayerToTeleport) {

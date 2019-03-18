@@ -20,7 +20,7 @@ public:
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
-	void InitializePlaterToTeleport();
+	void InitializePlayerToTeleport();
 	void InitializeRemoteTeleporter();
 	void InitializeLocalLocation();
 	void InitializeRemoteLocation();

@@ -75,7 +75,7 @@ void UGrabber::Grab()
 	{
 		this->PhysicsHandle->GrabComponentAtLocation(
 			ComponentToGrab,
-			NAME_None,
+			NAME_None, // no bone since this is not a skeleton
 			ComponentToGrab->GetOwner()->GetActorLocation()
 		);
 	}

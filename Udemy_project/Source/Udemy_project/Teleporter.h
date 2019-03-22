@@ -28,14 +28,19 @@ protected:
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
-	void TeleportPlayerWhenCollidingWithVolume();
 	
+	//fetch a list of overlapping actors and set their locations to the assigned remote location.
+	void TeleportActorsWhenCollidingWithVolume();
+	
+	//release/break a physics handle on a component if it is teleporting and currently being grabbed
+	void ReleasePhysicsHandleOnTeleportingActorHeldByPlayer(AActor * Actor);
+
 	UPROPERTY(EditAnywhere)
 	ATriggerVolume* LocalVolume = nullptr;
 	UPROPERTY(EditAnywhere)
 	AActor* RemoteTeleporter = nullptr;
 	AActor* PlayerToTeleport = nullptr;
+
 
 
 	void SetbCoolingDown(bool);

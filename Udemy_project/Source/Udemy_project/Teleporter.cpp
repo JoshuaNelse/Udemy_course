@@ -3,7 +3,10 @@
 #include "Teleporter.h"
 #include "GameFramework/Actor.h"
 #include "Engine/World.h"
+#include "Components/PrimitiveComponent.h"
+#include "PhysicsEngine/PhysicsHandleComponent.h"
 #include "GameFramework/PlayerController.h"
+#define OUT // visual aid for OUT variable functions
 
 // Sets default values for this component's properties
 UTeleporter::UTeleporter()
@@ -32,29 +35,49 @@ void UTeleporter::BeginPlay()
 void UTeleporter::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	TeleportPlayerWhenCollidingWithVolume();
+
+	TeleportActorsWhenCollidingWithVolume();
+
 }
 
 
-void UTeleporter::TeleportPlayerWhenCollidingWithVolume()
-{
-	if (!LocalVolume || !PlayerToTeleport || !RemoteTeleporter) {
-		return; //guarding null pointers
-	}
 
-	if (LocalVolume->IsOverlappingActor(PlayerToTeleport))
+void UTeleporter::TeleportActorsWhenCollidingWithVolume()
+{
+	TArray<AActor*> ActorsToTeleport;
+	LocalVolume->GetOverlappingActors(OUT ActorsToTeleport);
+	if (ActorsToTeleport.Num())
 	{
-		if (!bCoolingDown)
+		for (AActor* Actor : ActorsToTeleport)
 		{
-			PlayerToTeleport->SetActorLocation(RemoteLocation);
-			RemoteTeleporter->FindComponentByClass<UTeleporter>()->SetbCoolingDown(true);
+			if (!bCoolingDown)
+			{
+				InitializeRemoteLocation();
+				Actor->SetActorLocation(RemoteLocation);
+				RemoteTeleporter->FindComponentByClass<UTeleporter>()->SetbCoolingDown(true);
+				ReleasePhysicsHandleOnTeleportingActorHeldByPlayer(Actor);
+			}
 		}
 	}
 	else
 	{
-		this->bCoolingDown = false;
+		this->SetbCoolingDown(false);
 	}
 }
+
+void UTeleporter::ReleasePhysicsHandleOnTeleportingActorHeldByPlayer(AActor * Actor)
+{
+	UPhysicsHandleComponent* PlayerPhysicsHandle = this->PlayerToTeleport->FindComponentByClass<UPhysicsHandleComponent>();
+	if (PlayerPhysicsHandle->GetGrabbedComponent())
+	{
+		if (PlayerPhysicsHandle->GetGrabbedComponent()->GetOwner()->GetName() == Actor->GetName())
+		{
+			this->PlayerToTeleport->FindComponentByClass<UPhysicsHandleComponent>()->ReleaseComponent();
+			UE_LOG(LogTemp, Warning, TEXT("Physics handle Broke! The Item being held has teleported away."));
+		}
+	}
+}
+
 
 
 void UTeleporter::SetbCoolingDown(bool Boolean)

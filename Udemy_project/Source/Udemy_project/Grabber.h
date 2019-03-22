@@ -15,7 +15,8 @@ class UDEMY_PROJECT_API UGrabber : public UActorComponent
 	GENERATED_BODY()
 
 private:
-	float Reach = 100.f;
+	UPROPERTY(EditAnywhere)
+	float Reach = 200.f;
 	FVector ObjectLocation;
 	FRotator ObjectRotation;
 
